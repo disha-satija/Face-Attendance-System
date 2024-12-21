@@ -12,31 +12,33 @@ import datetime
 import time
 
 #funtions ha saare neeche
+
+# Used for checking directory
 def assure_path_exists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
 
-
+# Displays the real-time clock in GUI
 def tick():
     time_string = time.strftime('%H:%M:%S')
     clock.config(text=time_string)
     clock.after(200,tick)
 
-
+# Contact Function
 def contact():
-    mess._show(title='Contact us', message="Please contact us on : 'Priyansharora9291@gmail.com' ")
+    mess._show(title='Contact us', message="Please contact us on : 'disha.satija.23cse@bmu.edu.in' ")
 
+# file contaning pre-trained models
 def check_haarcascadefile():
-    exists = os.path.isfile("haarcascade_frontalface_default.xml")
+    exists = os.path.isfile("C:/Users/disha/OneDrive/Desktop/prj1/Face-attendance-system/haarcascade_frontalface_default.xml")
     if exists:
         pass
     else:
         mess._show(title='Some file missing', message='Please contact us for help')
         window.destroy()
 
-
-
+# save password function
 def save_pass():
     assure_path_exists("TrainingImageLabel/")
     exists1 = os.path.isfile("TrainingImageLabel\psd.txt")
@@ -55,7 +57,7 @@ def save_pass():
             return
     op = (old.get())
     newp= (new.get())
-    nnewp = (nnew.get())
+    nnewp = (nnew.get()) 
     if (op == key):
         if(newp == nnewp):
             txf = open("TrainingImageLabel\psd.txt", "w")
@@ -70,7 +72,7 @@ def save_pass():
     master.destroy()
 
 
-
+# used to change password
 def change_pass():
     global master
     master = tk.Tk()
@@ -100,7 +102,7 @@ def change_pass():
     master.mainloop()
 
 
-
+# verify password for training 
 def psw():
     assure_path_exists("TrainingImageLabel/")
     exists1 = os.path.isfile("TrainingImageLabel\psd.txt")
@@ -125,7 +127,7 @@ def psw():
         mess._show(title='Wrong Password', message='You have entered wrong password')
 
 
-
+# to clear entry boxes
 def clear():
     txt.delete(0, 'end')
     res = "1)Take Images  >>>  2)Save Profile"
@@ -137,7 +139,7 @@ def clear2():
     res = "1)Take Images  >>>  2)Save Profile"
     message1.configure(text=res)
 
-
+# used to activate web-cam 
 def TakeImages():
     check_haarcascadefile()
     columns = ['SERIAL NO.', '', 'ID', '', 'NAME']
@@ -162,7 +164,7 @@ def TakeImages():
     name = (txt2.get())
     if ((name.isalpha()) or (' ' in name)):
         cam = cv2.VideoCapture(0)
-        harcascadePath = "haarcascade_frontalface_default.xml"
+        harcascadePath = "C:/Users/disha/OneDrive/Desktop/prj1/Face-attendance-system/haarcascade_frontalface_default.xml"
         detector = cv2.CascadeClassifier(harcascadePath)
         sampleNum = 0
         while (True):
@@ -198,12 +200,12 @@ def TakeImages():
             res = "Enter Correct name"
             message.configure(text=res)
 
-
+# traverse the train-images for attendance
 def TrainImages():
     check_haarcascadefile()
     assure_path_exists("TrainingImageLabel/")
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    harcascadePath = "haarcascade_frontalface_default.xml"
+    harcascadePath = "C:/Users/disha/OneDrive/Desktop/prj1/Face-attendance-system/haarcascade_frontalface_default.xml"
     detector = cv2.CascadeClassifier(harcascadePath)
     faces, ID = getImagesAndLabels("TrainingImage")
     try:
@@ -216,7 +218,7 @@ def TrainImages():
     message1.configure(text=res)
     message.configure(text='Total Registrations till now  : ' + str(ID[0]))
 
-
+# student detail se data leke diply in csv
 def getImagesAndLabels(path):
     # get the path of all the files in the folder
     imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
@@ -239,87 +241,107 @@ def getImagesAndLabels(path):
 
 ###########################################################################################
 
+# 
 def TrackImages():
     check_haarcascadefile()
     assure_path_exists("Attendance/")
     assure_path_exists("StudentDetails/")
-    for k in tv.get_children():
-        tv.delete(k)
-    msg = ''
-    i = 0
-    j = 0
+    
+    # Load recognizer
     recognizer = cv2.face.LBPHFaceRecognizer_create()  # cv2.createLBPHFaceRecognizer()
-    exists3 = os.path.isfile("TrainingImageLabel\Trainner.yml")
+    exists3 = os.path.isfile("TrainingImageLabel/Trainner.yml")
+    
+    # If the trained model exists, load it
     if exists3:
-        recognizer.read("TrainingImageLabel\Trainner.yml")
+        recognizer.read("TrainingImageLabel/Trainner.yml")
     else:
-        mess._show(title='Data Missing', message='Please click on Save Profile to reset data!!')
+        print("Data Missing: Please click on Save Profile to reset data!")
         return
-    harcascadePath = "haarcascade_frontalface_default.xml"
+    
+    # Load Haarcascade for face detection
+    harcascadePath = "C:/Users/disha/OneDrive/Desktop/prj1/Face-attendance-system/haarcascade_frontalface_default.xml"
     faceCascade = cv2.CascadeClassifier(harcascadePath)
-
+    
+    # Start webcam
     cam = cv2.VideoCapture(0)
     font = cv2.FONT_HERSHEY_SIMPLEX
-    col_names = ['Id', '', 'Name', '', 'Date', '', 'Time']
-    exists1 = os.path.isfile("StudentDetails\StudentDetails.csv")
+    
+    # Load student details CSV
+    exists1 = os.path.isfile("StudentDetails/StudentDetails.csv")
     if exists1:
-        df = pd.read_csv("StudentDetails\StudentDetails.csv")
+        df = pd.read_csv("StudentDetails/StudentDetails.csv")
     else:
-        mess._show(title='Details Missing', message='Students details are missing, please check!')
+        print("Details Missing: Students details are missing, please check!")
         cam.release()
         cv2.destroyAllWindows()
-        window.destroy()
+        return
+    
+    # Track which students have been marked for attendance
+    marked_students = set()
 
     while True:
         ret, im = cam.read()
         gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
         faces = faceCascade.detectMultiScale(gray, 1.2, 5)
+        
         for (x, y, w, h) in faces:
             cv2.rectangle(im, (x, y), (x + w, y + h), (225, 0, 0), 2)
             serial, conf = recognizer.predict(gray[y:y + h, x:x + w])
-            if conf < 50:
+            
+            # Initialize bb with 'Unknown' in case of no recognition
+            bb = 'Unknown'
+            
+            # If confidence is above threshold, mark attendance only once
+            if conf < 50:  # Confidence threshold for recognition
                 ts = time.time()
                 date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
                 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
+                
                 aa = df.loc[df['SERIAL NO.'] == serial]['NAME'].values
                 ID = df.loc[df['SERIAL NO.'] == serial]['ID'].values
                 ID = str(ID)
                 ID = ID[1:-1]
                 bb = str(aa)
                 bb = bb[2:-2]
-                attendance = [str(ID), '', bb, '', str(date), '', str(timeStamp)]
-            else:
-                Id = 'Unknown'
-                bb = str(Id)
+                
+                # Check if the student has been marked before
+                if serial not in marked_students:
+                    # Prepare attendance data
+                    attendance = [str(ID), '', bb, '', str(date), '', str(timeStamp)]
+                    
+                    # Write the attendance to the CSV file
+                    attendance_file = f"Attendance/Attendance_{date}.csv"
+                    exists = os.path.isfile(attendance_file)
+                    
+                    try:
+                        with open(attendance_file, 'a+', newline='') as csvFile1:
+                            writer = csv.writer(csvFile1)
+                            
+                            # If file doesn't exist, write column names first
+                            if not exists:
+                                col_names = ['Id', '', 'Name', '', 'Date', '', 'Time']
+                                writer.writerow(col_names)
+                            
+                            # Write the attendance row
+                            writer.writerow(attendance)
+                        
+                        # Mark the student as attended
+                        marked_students.add(serial)
+                        print(f"Attendance marked for {bb}")
+                    except Exception as e:
+                        print(f"Error writing to file: {e}")
+            
             cv2.putText(im, str(bb), (x, y + h), font, 1, (255, 255, 255), 2)
+        
+        # Show the webcam feed
         cv2.imshow('Taking Attendance', im)
-        if cv2.waitKey(1) == ord('q'):
+        
+        # Exit the loop if 'q' is pressed or if all students have been marked
+        if cv2.waitKey(1) == ord('q') or len(marked_students) == len(df):  # Exit when all students are marked
+            print("All attendance marked or camera stopped.")
             break
-
-    ts = time.time()
-    date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
-    exists = os.path.isfile("Attendance\Attendance_" + date + ".csv")
-    if exists:
-        with open("Attendance\Attendance_" + date + ".csv", 'a+') as csvFile1:
-            writer = csv.writer(csvFile1)
-            writer.writerow(attendance)
-        csvFile1.close()
-    else:
-        with open("Attendance\Attendance_" + date + ".csv", 'a+') as csvFile1:
-            writer = csv.writer(csvFile1)
-            writer.writerow(col_names)
-            writer.writerow(attendance)
-        csvFile1.close()
-
-    with open("Attendance\Attendance_" + date + ".csv", 'r') as csvFile1:
-        reader1 = csv.reader(csvFile1)
-        for lines in reader1:
-            i = i + 1
-            if i > 1 and len(lines) >= 3:  # Check if lines has elements
-                iidd = str(lines[0]) + '   '
-                tv.insert('', 0, text=iidd, values=(str(lines[2]), str(lines[4]), str(lines[6])))
-    csvFile1.close()
-
+    
+    # Release the camera and close windows
     cam.release()
     cv2.destroyAllWindows()
 
